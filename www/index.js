@@ -6,8 +6,8 @@ const GRID_COLOR = "#CCCCCC";
 // UNUSED : const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
-const WIDTH = 256;
-const HEIGHT = 256;
+const WIDTH = 6;
+const HEIGHT = 6;
 
 const universe = Universe.new(WIDTH, HEIGHT);
 
@@ -17,6 +17,7 @@ canvas.width = (CELL_SIZE + 1) * WIDTH + 1;
 const ctx = canvas.getContext('2d');
 
 const playPauseButton = document.getElementById("play-pause");
+const stepButton = document.getElementById("step");
 
 let simulationRunning = false;
 
@@ -144,5 +145,9 @@ playPauseButton.addEventListener("click", event => {
     simulationRunning = !simulationRunning;
     playPauseButton.textContent = simulationRunning ? "⏸" : "▶";
 });
+
+stepButton.addEventListener("click", event => {
+    universe.tick();
+})
 
 requestAnimationFrame(renderLoop);

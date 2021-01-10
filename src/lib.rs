@@ -80,36 +80,13 @@ impl Universe {
     pub fn new(width: u32, height: u32) -> Universe {
         utils::set_panic_hook();
         let cells = (0..width * height)
-            .map(|i| {
-                //if js_sys::Math::random() < 0.5 {
-                if i % 2 == 0 || i % 7 == 0 {
-                    Cell::Dead
-                } else {
-                    Cell::Alive
-                }
-            })
+            .map(|_i| { Cell::Dead })
             .collect();
         Universe {
             width,
             height,
             cells,
         }
-    }
-
-    /// Set the width of the universe
-    ///
-    /// Reset all cells to dead state
-    pub fn set_width(&mut self, width: u32) {
-        self.width = width;
-        self.clear_cells();
-    }
-
-    /// Set the height of the universe
-    ///
-    /// Reset all cells to dead state
-    pub fn set_height(&mut self, height: u32) {
-        self.height = height;
-        self.clear_cells();
     }
 
     /// Set all cells to dead state
