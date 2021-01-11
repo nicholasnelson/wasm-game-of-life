@@ -1,17 +1,31 @@
 import { Universe, Cell } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
-const CELL_SIZE = 5; // px
-const GRID_COLOR = "#CCCCCC";
+const TPS_TARGET = 60;
 
-const CELL_COLORS = [
-    { "type": Cell.Red, "color": "#FF0000" },
-    { "type": Cell.Green, "color": "#00FF00" },
-    { "type": Cell.Blue, "color": "#0000FF" },
+const CELL_SIZE = 20; // px
+const GRID_COLOR = "#AAAAAA";
+
+const CELL_COLORS_GRADIANT = [
+    { "type": Cell.Green,   "color": "#DAF7A6" },
+    { "type": Cell.Yellow,  "color": "#FFC300" },
+    { "type": Cell.Red,     "color": "#FF5733" },
+    { "type": Cell.Magenta, "color": "#C70039" },
+    { "type": Cell.Blue,    "color": "#900C3F" },
+    { "type": Cell.Cyan,    "color": "#581845" },
 ];
 
-const WIDTH = 32;
-const HEIGHT = 32;
+const CELL_COLORS = [
+    { "type": Cell.Green,   "color": "#00FF00" },
+    { "type": Cell.Yellow,  "color": "#FFFF00" },
+    { "type": Cell.Red,     "color": "#FF0000" },
+    { "type": Cell.Magenta, "color": "#8B00FF" },
+    { "type": Cell.Blue,    "color": "#2E2B5F" },
+    { "type": Cell.Cyan,    "color": "#0000FF" },
+];
+
+const WIDTH = 150;
+const HEIGHT = 100;
 
 const universe = Universe.new(WIDTH, HEIGHT);
 
@@ -24,19 +38,23 @@ const playPauseButton = document.getElementById("play-pause");
 const stepButton = document.getElementById("step");
 const randomiseButton = document.getElementById("randomise");
 
-let simulationRunning = false;
+let simulationRunning = true;
 
-const renderLoop = () => {
+let lastRender = -1;
+
+
+const renderLoop = (timestamp) => {
     fps.render();
     
-    if (simulationRunning) {
+    if (simulationRunning && timestamp > lastRender + 1000 / TPS_TARGET) {
         for (let i = 0; i < 1; i++) {
             universe.tick();
+            lastRender = timestamp;
         }
     }
 
     clearCanvas();
-    drawGrid();
+    //drawGrid();
     drawCells();
 
     requestAnimationFrame(renderLoop);
@@ -163,4 +181,5 @@ randomiseButton.addEventListener("click", event => {
     universe.randomise();
 });
 
+universe.randomise();
 requestAnimationFrame(renderLoop);

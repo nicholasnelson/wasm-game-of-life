@@ -16,6 +16,8 @@ use std::cmp;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+const CELL_TYPE_COUNT: usize = 7;
+
 // A macro to provide 'println!(...)'-style syntax for 'console.log' logging
 macro_rules! log {
     ( $( $t:tt )* ) => {
@@ -29,36 +31,28 @@ macro_rules! log {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive)]
 pub enum Cell {
     Dead = 0,
-    Red = 1,
-    Green = 2,
-    Blue = 3,
+    Green = 1,
+    Yellow = 2,
+    Red = 3,
+    Magenta = 4,
+    Blue = 5,
+    Cyan = 6,
 }
 
 impl Cell {
     fn toggle(&mut self) {
-        *self = match *self {
-            Cell::Dead => Cell::Red,
-            Cell::Red => Cell::Green,
-            Cell::Green => Cell::Blue,
-            Cell::Blue => Cell::Dead,
-        };
+        *self = num::FromPrimitive::from_usize((*self as usize + 1) % CELL_TYPE_COUNT).unwrap()
     }
 
-    pub fn food(&self) -> Cell {
+    pub fn food(&self) -> [Cell; 2] {
         match self {
-            Cell::Blue => Cell::Red,
-            Cell::Red => Cell::Green,
-            Cell::Green => Cell::Blue,
-            _ => panic!("Attempted to call food() for Cell type which has no food.")
-        }
-    }
-
-    pub fn foe(&self) -> Cell {
-        match self {
-            Cell::Blue => Cell::Green,
-            Cell::Red => Cell::Blue,
-            Cell::Green => Cell::Red,
-            _ => panic!("Attempted to call foe() for Cell type which has no foes.")
+            Cell::Green => [Cell::Yellow, Cell::Cyan],
+            Cell::Yellow => [Cell::Red, Cell::Green],
+            Cell::Red => [Cell::Magenta, Cell::Yellow],
+            Cell::Magenta => [Cell::Blue, Cell::Red],
+            Cell::Blue => [Cell::Cyan, Cell::Magenta],
+            Cell::Cyan => [Cell::Green, Cell::Blue],
+            _ => panic!("Called food() for Cell type which has no food.")
         }
     }
 
@@ -68,6 +62,9 @@ impl Cell {
             Cell::Red => "Red",
             Cell::Green => "Green",
             Cell::Blue => "Blue",
+            Cell::Magenta => "Magenta",
+            Cell::Yellow => "Yellow",
+            Cell::Cyan => "Cyan",
         }
     }
 }
@@ -129,7 +126,7 @@ impl Universe {
     pub fn randomise(&mut self) {
         self.cells = (0..self.width * self.height)
             .map(|_i| {
-                let random = (js_sys::Math::random() * 4.0).floor();
+                let random = (js_sys::Math::random() * CELL_TYPE_COUNT as f64).floor();
                 num::FromPrimitive::from_f64(random).unwrap()
             }).collect();
     }
@@ -170,11 +167,15 @@ impl Universe {
 impl Universe {
     fn neighbor_friendliness(&self, cell: Cell, row: u32, column: u32) -> (Cell, i8, i8) {
         // Type, Count of Type, Ate Count
+        // NOTE: The order of this must match the Cells definition for now
         let mut neighbor_count = vec![
             (Cell::Dead, 0, 0),
-            (Cell::Red, 0, 0),
             (Cell::Green, 0, 0),
+            (Cell::Yellow, 0, 0),
+            (Cell::Red, 0, 0),
+            (Cell::Magenta, 0, 0),
             (Cell::Blue, 0, 0),
+            (Cell::Cyan, 0, 0),
         ];
 
         let row_above = match row {
@@ -227,7 +228,7 @@ impl Universe {
             // For each candidate, eat as much food as is available
             // TODO : If we ever have multiple foods per type, may want to change the order here to eat smallest groups first
             for target_index in 0..neighbor_count.len() {
-                if neighbor_count[candidate_index].0.food() == neighbor_count[target_index].0 {
+                if neighbor_count[candidate_index].0.food().contains(&neighbor_count[target_index].0) {
                     // Calculate how much the candidate eats
                     neighbor_count[candidate_index].2 = cmp::min(neighbor_count[target_index].1, neighbor_count[candidate_index].1);
                     // Remove the appropriate prey population
