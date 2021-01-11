@@ -1,12 +1,14 @@
 extern crate js_sys;
 extern crate web_sys;
+extern crate num;
+#[macro_use]
+extern crate num_derive;
 
 mod utils;
 
-//use std::fmt;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
-
+use std::cmp;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -21,20 +23,52 @@ macro_rules! log {
     }
 }
 
+
 #[wasm_bindgen]
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive)]
 pub enum Cell {
     Dead = 0,
-    Alive = 1,
+    Red = 1,
+    Green = 2,
+    Blue = 3,
 }
 
 impl Cell {
     fn toggle(&mut self) {
         *self = match *self {
-            Cell::Dead => Cell::Alive,
-            Cell::Alive => Cell::Dead,
+            Cell::Dead => Cell::Red,
+            Cell::Red => Cell::Green,
+            Cell::Green => Cell::Blue,
+            Cell::Blue => Cell::Dead,
         };
+    }
+
+    pub fn food(&self) -> Cell {
+        match self {
+            Cell::Blue => Cell::Red,
+            Cell::Red => Cell::Green,
+            Cell::Green => Cell::Blue,
+            _ => panic!("Attempted to call food() for Cell type which has no food.")
+        }
+    }
+
+    pub fn foe(&self) -> Cell {
+        match self {
+            Cell::Blue => Cell::Green,
+            Cell::Red => Cell::Blue,
+            Cell::Green => Cell::Red,
+            _ => panic!("Attempted to call foe() for Cell type which has no foes.")
+        }
+    }
+
+    fn to_string(&self) -> &str {
+        match *self {
+            Cell::Dead => "Dead",
+            Cell::Red => "Red",
+            Cell::Green => "Green",
+            Cell::Blue => "Blue",
+        }
     }
 }
 
@@ -55,19 +89,22 @@ impl Universe {
             for col in 0..self.width {
                 let idx = self.get_index(row, col);
                 let cell = self.cells[idx];
-                let live_neighbors = self.live_neighbor_count(row, col);
+                
+                let (candidate_cell, friendliness, food) = self.neighbor_friendliness(cell, row, col);
 
-                let next_cell = match (cell, live_neighbors) {
-                    // Rule 1: Die if < 2 live neighbors : IDEA - Hierarchical "foodchain" where this is based on live neighbors lower on the chain
-                    (Cell::Alive, x) if x < 2 => Cell::Dead,
-                    // Rule 2: Survive if 2-3 live neighbors
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-                    // Rule 3: Die if > 3 live neighbors
-                    (Cell::Alive, x) if x > 3 => Cell::Dead,
-                    // Rule 4: Birth if 3 live neighbors
-                    (Cell::Dead, 3) => Cell::Alive,
+                let next_cell = match (cell, friendliness, food) {
+                    // Birth
+                    (Cell::Dead, 3, _) => candidate_cell,
+                    (Cell::Dead, friendliness, food) if friendliness > 0 && food > 0 => candidate_cell,
+                    // Starve
+                    (_, friendliness, food) if friendliness + food < 2 => Cell::Dead,
+                    // Survive
+                    (current_cell_state, 2, _) | (current_cell_state, 3, _) => current_cell_state,
+                    (current_cell_state, _, food) if food > 0 => current_cell_state,
+                    // Overcrowd
+                    (_, friendliness, _) if friendliness > 3 => Cell::Dead,
                     // Otherwise, no change
-                    (current_cell_state, _) => current_cell_state
+                    (current_cell_state, _, _) => current_cell_state
                 };
 
                 next[idx] = next_cell;
@@ -87,6 +124,14 @@ impl Universe {
             height,
             cells,
         }
+    }
+
+    pub fn randomise(&mut self) {
+        self.cells = (0..self.width * self.height)
+            .map(|_i| {
+                let random = (js_sys::Math::random() * 4.0).floor();
+                num::FromPrimitive::from_f64(random).unwrap()
+            }).collect();
     }
 
     /// Set all cells to dead state
@@ -114,11 +159,23 @@ impl Universe {
     pub fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
     }
+
+    pub fn get_cell_stats(&self, row: u32, column: u32) -> String {
+        let cell = self.cells[self.get_index(row, column)];
+        let stats = self.neighbor_friendliness(cell, row, column);
+        format!("({},{}) {} - Candidate: {}, Friendliness: {}, Food: {}", row, column, cell.to_string(), stats.0.to_string(), stats.1, stats.2)
+    }
 }
 
 impl Universe {
-    fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
-        let mut count = 0;
+    fn neighbor_friendliness(&self, cell: Cell, row: u32, column: u32) -> (Cell, i8, i8) {
+        // Type, Count of Type, Ate Count
+        let mut neighbor_count = vec![
+            (Cell::Dead, 0, 0),
+            (Cell::Red, 0, 0),
+            (Cell::Green, 0, 0),
+            (Cell::Blue, 0, 0),
+        ];
 
         let row_above = match row {
             r if r == 0             => self.height - 1,
@@ -146,11 +203,59 @@ impl Universe {
                     continue;
                 }
 
-                let idx = self.get_index(test_row, test_column);
-                count += self.cells[idx] as u8;
+                let target = self.cells[self.get_index(test_row, test_column)];
+
+                // Don't count dead cells
+                if target == Cell::Dead {
+                    continue;
+                }
+
+                // Increment the counter for this cell
+                neighbor_count[target as usize].1 += 1;
             }
         }
-        count
+
+        // log!(" Pre: {}, {:?}", neighbor_count.len(), neighbor_count);
+
+        // Remove cells which are Dead or have 0 population
+        neighbor_count.retain(|&i| i.0 != Cell::Dead && i.1 > 0);
+
+        // Sort by population
+        neighbor_count.sort_by(|a, b| b.1.cmp(&a.1));
+        // In population order, calculate predating
+        for candidate_index in 0..neighbor_count.len() {
+            // For each candidate, eat as much food as is available
+            // TODO : If we ever have multiple foods per type, may want to change the order here to eat smallest groups first
+            for target_index in 0..neighbor_count.len() {
+                if neighbor_count[candidate_index].0.food() == neighbor_count[target_index].0 {
+                    // Calculate how much the candidate eats
+                    neighbor_count[candidate_index].2 = cmp::min(neighbor_count[target_index].1, neighbor_count[candidate_index].1);
+                    // Remove the appropriate prey population
+                    neighbor_count[target_index].1 -= neighbor_count[candidate_index].2;
+                }
+            }
+        }
+
+        // log!("Post: {}, {:?}", neighbor_count.len(), neighbor_count);
+
+        // If the current cell is dead, elect the strongest surrounding cell type
+        if cell == Cell::Dead {
+            // Sort into food + population descending order
+            neighbor_count.sort_by(|a, b| (b.1 + b.2).cmp(&(a.1 + a.2)));
+            // Return the best candidate
+            match neighbor_count.first() {
+                Some(x) => *x,
+                None    => (Cell::Dead, 0, 0)
+            }
+        // Otherwise give the stats for the currently alive cell type (or 0)
+        } else {
+            match neighbor_count.iter().find(|i| i.0 == cell) {
+                Some(x) => *x,
+                None    => (cell, 0, 0)
+            }
+        }
+
+        // log!("{},{} - Candidate: {} - Friendliness: {} - Food: {}", row, column, candidate_cell.to_string(), friendliness, food);
     }
 
     /// Get the dead and alive values of the entire universe
@@ -163,25 +268,7 @@ impl Universe {
     pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
         for (row, col) in cells.iter().cloned() {
             let idx = self.get_index(row, col);
-            self.cells[idx] = Cell::Alive;
+            self.cells[idx] = Cell::Red;
         }
     }
 }
-
-// impl fmt::Display for Universe {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         for line in self.cells.as_slice().chunks(self.width as usize) {
-//             for &cell in line {
-//                 let symbol = if cell == Cell::Dead { '◻' } else { '◼' };
-//                 write!(f, "{}", symbol)?;
-//             }
-//             write!(f, "\n")?;
-//         }
-
-//         Ok(())
-//     }
-// }
-
-// pub struct Timer<'a> {
-//     name: &'a str,
-// }

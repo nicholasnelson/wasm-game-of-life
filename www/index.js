@@ -3,11 +3,15 @@ import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
 const CELL_SIZE = 5; // px
 const GRID_COLOR = "#CCCCCC";
-// UNUSED : const DEAD_COLOR = "#FFFFFF";
-const ALIVE_COLOR = "#000000";
 
-const WIDTH = 6;
-const HEIGHT = 6;
+const CELL_COLORS = [
+    { "type": Cell.Red, "color": "#FF0000" },
+    { "type": Cell.Green, "color": "#00FF00" },
+    { "type": Cell.Blue, "color": "#0000FF" },
+];
+
+const WIDTH = 32;
+const HEIGHT = 32;
 
 const universe = Universe.new(WIDTH, HEIGHT);
 
@@ -18,6 +22,7 @@ const ctx = canvas.getContext('2d');
 
 const playPauseButton = document.getElementById("play-pause");
 const stepButton = document.getElementById("step");
+const randomiseButton = document.getElementById("randomise");
 
 let simulationRunning = false;
 
@@ -64,25 +69,27 @@ const drawCells = () => {
     const cellsPtr = universe.cells();
     const cells = new Uint8Array(memory.buffer, cellsPtr, WIDTH * HEIGHT)
 
-    ctx.beginPath();
-    ctx.fillStyle = ALIVE_COLOR;
-
-    for (let row = 0; row < HEIGHT; row++) {
-        for (let col = 0; col < WIDTH; col++) {
-            const idx = universe.get_index(row, col);
-
-            if (cells[idx] === Cell.Alive) {
-                ctx.fillRect(
-                    col * (CELL_SIZE + 1) + 1,
-                    row * (CELL_SIZE + 1) + 1,
-                    CELL_SIZE,
-                    CELL_SIZE
-                );
+    
+    for (let cell_color of CELL_COLORS) {
+        ctx.beginPath();
+        ctx.fillStyle = cell_color.color;
+        for (let row = 0; row < HEIGHT; row++) {
+            for (let col = 0; col < WIDTH; col++) {
+                const idx = universe.get_index(row, col);
+    
+                if (cells[idx] === cell_color.type) {
+                    ctx.fillRect(
+                        col * (CELL_SIZE + 1) + 1,
+                        row * (CELL_SIZE + 1) + 1,
+                        CELL_SIZE,
+                        CELL_SIZE
+                    );
+                }
             }
         }
+        ctx.stroke();
     }
 
-    ctx.stroke();
 };
 
 canvas.addEventListener("click", event => {
@@ -97,10 +104,12 @@ canvas.addEventListener("click", event => {
     const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), HEIGHT - 1);
     const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), WIDTH - 1);
 
-    universe.toggle_cell(row, col);
+    if (event.ctrlKey) {
+        console.log(universe.get_cell_stats(row, col));
+    } else {
+        universe.toggle_cell(row, col);
+    }
 
-    drawGrid();
-    drawCells();
 });
 
 const fps = new class {
@@ -148,6 +157,10 @@ playPauseButton.addEventListener("click", event => {
 
 stepButton.addEventListener("click", event => {
     universe.tick();
-})
+});
+
+randomiseButton.addEventListener("click", event => {
+    universe.randomise();
+});
 
 requestAnimationFrame(renderLoop);
