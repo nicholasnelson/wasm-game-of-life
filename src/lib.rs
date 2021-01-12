@@ -46,12 +46,12 @@ impl Cell {
 
     pub fn food(&self) -> [Cell; 2] {
         match self {
-            Cell::Green => [Cell::Yellow, Cell::Cyan],
-            Cell::Yellow => [Cell::Red, Cell::Green],
-            Cell::Red => [Cell::Magenta, Cell::Yellow],
-            Cell::Magenta => [Cell::Blue, Cell::Red],
-            Cell::Blue => [Cell::Cyan, Cell::Magenta],
-            Cell::Cyan => [Cell::Green, Cell::Blue],
+            Cell::Green => [Cell::Yellow, Cell::Red],
+            Cell::Yellow => [Cell::Red, Cell::Magenta],
+            Cell::Red => [Cell::Magenta, Cell::Blue],
+            Cell::Magenta => [Cell::Blue, Cell::Cyan],
+            Cell::Blue => [Cell::Cyan, Cell::Green],
+            Cell::Cyan => [Cell::Green, Cell::Yellow],
             _ => panic!("Called food() for Cell type which has no food.")
         }
     }
@@ -128,6 +128,13 @@ impl Universe {
             .map(|_i| {
                 let random = (js_sys::Math::random() * CELL_TYPE_COUNT as f64).floor();
                 num::FromPrimitive::from_f64(random).unwrap()
+            }).collect();
+    }
+
+    pub fn set_pattern(&mut self) {
+        self.cells = (0..self.width * self.height)
+            .map(|i| {
+                num::FromPrimitive::from_u32(i % (self.width / CELL_TYPE_COUNT as u32)).unwrap()
             }).collect();
     }
 

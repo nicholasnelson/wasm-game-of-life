@@ -3,7 +3,7 @@ import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
 const TPS_TARGET = 60;
 
-const CELL_SIZE = 20; // px
+const CELL_SIZE = 5; // px
 const GRID_COLOR = "#AAAAAA";
 
 const CELL_COLORS_GRADIANT = [
@@ -15,7 +15,7 @@ const CELL_COLORS_GRADIANT = [
     { "type": Cell.Cyan,    "color": "#581845" },
 ];
 
-const CELL_COLORS = [
+const CELL_COLORS_RAINBOW = [
     { "type": Cell.Green,   "color": "#00FF00" },
     { "type": Cell.Yellow,  "color": "#FFFF00" },
     { "type": Cell.Red,     "color": "#FF0000" },
@@ -24,8 +24,17 @@ const CELL_COLORS = [
     { "type": Cell.Cyan,    "color": "#0000FF" },
 ];
 
-const WIDTH = 150;
-const HEIGHT = 100;
+const CELL_COLORS = [
+    { "type": Cell.Green,   "color": "#4CBB17" },
+    { "type": Cell.Yellow,  "color": "#FFD987" },
+    { "type": Cell.Red,     "color": "#FF0002" },
+    { "type": Cell.Magenta, "color": "#6A0400" },
+    { "type": Cell.Blue,    "color": "#0001FC" },
+    { "type": Cell.Cyan,    "color": "#AAAAFF" },
+];
+
+const WIDTH = 128;
+const HEIGHT = 128;
 
 const universe = Universe.new(WIDTH, HEIGHT);
 
@@ -37,6 +46,7 @@ const ctx = canvas.getContext('2d');
 const playPauseButton = document.getElementById("play-pause");
 const stepButton = document.getElementById("step");
 const randomiseButton = document.getElementById("randomise");
+const setPatternButton = document.getElementById("set-pattern");
 
 let simulationRunning = true;
 
@@ -181,5 +191,10 @@ randomiseButton.addEventListener("click", event => {
     universe.randomise();
 });
 
-universe.randomise();
+setPatternButton.addEventListener("click", event => {
+    universe.set_pattern();
+});
+
+universe.set_pattern();
+
 requestAnimationFrame(renderLoop);
