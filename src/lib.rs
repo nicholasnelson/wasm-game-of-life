@@ -134,7 +134,7 @@ impl Universe {
     pub fn set_pattern(&mut self) {
         self.cells = (0..self.width * self.height)
             .map(|i| {
-                num::FromPrimitive::from_u32(i % (self.width / CELL_TYPE_COUNT as u32)).unwrap()
+                num::FromPrimitive::from_u32(i / (self.width * self.height / (CELL_TYPE_COUNT - 1) as u32)).unwrap()
             }).collect();
     }
 
