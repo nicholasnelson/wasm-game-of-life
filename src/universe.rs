@@ -1,3 +1,4 @@
+use std::fmt;
 use wasm_bindgen::prelude::*;
 
 use crate::utils;
@@ -19,15 +20,17 @@ impl Cell {
     }
 
     fn is_alive(&self) -> bool {
-        self.properties[0] != 0u8 || self.properties[1] != 0u8 || self.properties[1] != 0u8
-    }
-
-    fn to_string(&self) -> String {
-        format!("({},{},{})", self.properties[0], self.properties[1], self.properties[2])
+        self.properties[0] != 0u8 || self.properties[1] != 0u8 || self.properties[2] != 0u8
     }
 
     fn new(properties: [u8; 3]) -> Cell {
         Cell { properties }
+    }
+}
+
+impl fmt::Display for Cell {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Cell({},{},{})", self.properties[0], self.properties[1], self.properties[2])
     }
 }
 
@@ -73,7 +76,7 @@ impl Universe {
         Universe {
             width,
             height,
-            cell_buffer: [cells.clone(), cells.clone()],
+            cell_buffer: [cells.clone(), cells],
             cell_buffer_index: 0,
         }
     }
@@ -128,7 +131,7 @@ impl Universe {
     pub fn get_cell_stats(&self, row: u32, column: u32) -> String {
         let cell = self.cell_buffer[self.cell_buffer_index][self.get_index(row, column)];
         let neighbor_count = self.neighbor_count(row, column);
-        format!("({},{}) {} - Neighbors: {}", row, column, cell.to_string(), neighbor_count)
+        format!("({},{}) {} - Neighbors: {}", row, column, cell, neighbor_count)
     }
 }
 
