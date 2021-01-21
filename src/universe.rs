@@ -92,14 +92,13 @@ impl Universe {
     }
 
     pub fn set_pattern(&mut self) {
-        self.cell_buffer[self.cell_buffer_index] = (0..self.width * self.height)
-            .map(|i| {
-                if i % 3 == 0 || i % 5 == 0 {
-                    Cell::new([255,0,0])
-                } else {
-                    Cell::new([0,0,0])
-                }
-            }).collect();
+        for i in 0..self.cell_buffer[self.cell_buffer_index].len() {
+            if i % 3 == 0 || i % 5 == 0 {
+                self.cell_buffer[self.cell_buffer_index][i] = Cell::new([255,0,0])
+            } else {
+                self.cell_buffer[self.cell_buffer_index][i] = Cell::new([0,0,0])
+            }
+        }
     }
 
     /// Set all cells to dead state

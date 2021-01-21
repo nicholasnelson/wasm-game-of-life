@@ -9,6 +9,7 @@ const HEIGHT = 32;
 const playPauseButton = document.getElementById('play-pause');
 const stepButton = document.getElementById('step');
 const randomiseButton = document.getElementById('randomise');
+const setPatternButton = document.getElementById('set-pattern');
 
 let simulationRunning = true;
 
@@ -40,6 +41,10 @@ stepButton.addEventListener('click', () => {
 
 randomiseButton.addEventListener('click', () => {
   universe.randomise();
+});
+
+setPatternButton.addEventListener('click', () => {
+  universe.setPattern();
 });
 
 requestAnimationFrame(renderLoop);
