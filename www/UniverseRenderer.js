@@ -45,6 +45,31 @@ function getZFromScale(scale, fov, height) {
   return cameraZPosition;
 }
 
+function createGridObject(width, height, spacing = 1, color = 0x222222) {
+  const material = new THREE.LineBasicMaterial({
+    color,
+  });
+
+  const gridObject = new THREE.Object3D();
+  const geometry = new THREE.Geometry();
+
+  for (let i = -width / 2; i <= width / 2; i += spacing) {
+    geometry.vertices.push(new THREE.Vector3(-height / 2, i));
+    geometry.vertices.push(new THREE.Vector3(height / 2, i));
+  }
+
+  for (let i = -height / 2; i <= height / 2; i += spacing) {
+    geometry.vertices.push(new THREE.Vector3(i, -width / 2));
+    geometry.vertices.push(new THREE.Vector3(i, width / 2));
+  }
+
+  const line = new THREE.LineSegments(geometry, material);
+  gridObject.add(line);
+  gridObject.position.set(-spacing / 2, spacing / 2, 1);
+
+  return gridObject;
+}
+
 export default class UniverseRenderer {
   constructor(universe, container) {
     this.universe = universe;
@@ -97,6 +122,9 @@ export default class UniverseRenderer {
       geometry.setAttribute('color', colorBuffer);
       const mesh = new THREE.Points(geometry, material);
       scene.add(mesh);
+
+      scene.add(createGridObject(universe.width, universe.height));
+
       return { scene, mesh };
     });
 
