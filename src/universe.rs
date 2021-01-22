@@ -20,7 +20,7 @@ impl Cell {
     }
 
     fn is_alive(&self) -> bool {
-        self.properties[0] != 0u8 || self.properties[1] != 0u8 || self.properties[2] != 0u8
+        self.properties[0] != 0 || self.properties[1] != 0 || self.properties[2] != 0
     }
 
     fn new(properties: [u8; 3]) -> Cell {
@@ -136,7 +136,6 @@ impl Universe {
 
 impl Universe {
     fn neighbor_count(&self, row: u32, column: u32) -> u8 {
-        let mut neighbor_count = 0u8;
         
         let row_above = match row {
             r if r == 0             => self.height - 1,
@@ -158,17 +157,17 @@ impl Universe {
             c                           => c + 1
         };
 
-        for test_row in [row_above, row, row_below].iter().cloned() {
-            for test_column in [column_left, column, column_right].iter().cloned() {
-                if test_row == row && test_column == column {
-                    continue;
-                }
+        let cell_buffer = &self.cell_buffer[self.cell_buffer_index];
+        let mut neighbor_count = 0u8;
 
-                if self.cell_buffer[self.cell_buffer_index][self.get_index(test_row, test_column)].is_alive() {
-                    neighbor_count += 1;
-                }
-            }
-        }
+        if cell_buffer[self.get_index(row_above, column_left)].is_alive() { neighbor_count += 1 }
+        if cell_buffer[self.get_index(row_above, column)].is_alive() { neighbor_count += 1 }
+        if cell_buffer[self.get_index(row_above, column_right)].is_alive() { neighbor_count += 1 }
+        if cell_buffer[self.get_index(row, column_left)].is_alive() { neighbor_count += 1 }
+        if cell_buffer[self.get_index(row, column_right)].is_alive() { neighbor_count += 1 }
+        if cell_buffer[self.get_index(row_below, column_left)].is_alive() { neighbor_count += 1 }
+        if cell_buffer[self.get_index(row_below, column)].is_alive() { neighbor_count += 1 }
+        if cell_buffer[self.get_index(row_below, column_right)].is_alive() { neighbor_count += 1 }
 
         neighbor_count
     }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RUSTFLAGS="-g" cargo bench
+RUSTFLAGS="-g" cargo bench | tee -a ./bench-results.txt
 
 TARGET_FOLDER='./target/release/deps/'
 

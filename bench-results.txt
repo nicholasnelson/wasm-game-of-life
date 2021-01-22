@@ -1,0 +1,121 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     378,815 ns/iter (+/- 213,252)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 3.83s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     408,543 ns/iter (+/- 111,346)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 3.83s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     221,120 ns/iter (+/- 16,042)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 3.02s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     429,771 ns/iter (+/- 194,471)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 4.11s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     413,486 ns/iter (+/- 49,683)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 2.64s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:   2,799,437 ns/iter (+/- 506,270)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 2.70s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     403,606 ns/iter (+/- 7,863)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 3.82s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     250,557 ns/iter (+/- 2,770)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 0.98s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     249,914 ns/iter (+/- 4,595)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 0.56s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     251,057 ns/iter (+/- 4,632)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 0.56s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test universe_ticks ... bench:     208,310 ns/iter (+/- 5,471)
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured; 0 filtered out; finished in 0.22s
+
