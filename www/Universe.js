@@ -11,6 +11,7 @@ export default class Universe {
     this.targetTps = 30;
     this.CELLBUFFERCOUNT = 2;
     this.universe = RustUniverse.new(width, height);
+    this.currentBufferIndex = 0;
   }
 
   tick(cycles = 1) {

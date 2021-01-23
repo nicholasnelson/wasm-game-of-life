@@ -6,3 +6,4 @@ pkg/
 wasm-pack.log
 perf.data*
 callgrind.out.*
+bench-results.txt

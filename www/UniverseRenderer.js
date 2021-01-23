@@ -54,13 +54,13 @@ function createGridObject(width, height, spacing = 1, color = 0x222222) {
   const geometry = new THREE.Geometry();
 
   for (let i = -width / 2; i <= width / 2; i += spacing) {
-    geometry.vertices.push(new THREE.Vector3(-height / 2, i));
-    geometry.vertices.push(new THREE.Vector3(height / 2, i));
+    geometry.vertices.push(new THREE.Vector3(i, -height / 2, 0));
+    geometry.vertices.push(new THREE.Vector3(i, height / 2, 0));
   }
 
   for (let i = -height / 2; i <= height / 2; i += spacing) {
-    geometry.vertices.push(new THREE.Vector3(i, -width / 2));
-    geometry.vertices.push(new THREE.Vector3(i, width / 2));
+    geometry.vertices.push(new THREE.Vector3(-width / 2, i, 0));
+    geometry.vertices.push(new THREE.Vector3(width / 2, i, 0));
   }
 
   const line = new THREE.LineSegments(geometry, material);
@@ -206,5 +206,10 @@ export default class UniverseRenderer {
     const bufferIndex = this.universe.currentBufferIndex;
     this.scenes[bufferIndex].mesh.geometry.getAttribute('color').needsUpdate = true;
     this.renderer.render(this.scenes[bufferIndex].scene, this.camera);
+  }
+
+  destroy() {
+    this.renderer.domElement.remove();
+    delete this;
   }
 }
